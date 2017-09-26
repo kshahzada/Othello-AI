@@ -70,3 +70,11 @@ model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_s
 # Final evaluation of the model
 scores = model.evaluate(X_test, y_test, verbose=0)
 print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+
+# serialize model to JSON
+model_json = model.to_json()
+with open("CNN_LARGER.json", "w") as json_file:
+    json_file.write(model_json)
+# serialize weights to HDF5
+model.save_weights("CNN_LARGER.h5")
+print("Saved model to disk")

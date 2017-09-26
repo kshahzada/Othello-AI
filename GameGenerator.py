@@ -35,5 +35,5 @@ def saveSim(filename='objs.pickle'):
         
 def loadSim(filename='objs.pickle'):
     global sim
-    with open('objs.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
+    with open(filename, 'rb') as f:  # Python 3: open(..., 'rb')
         sim = pickle.load(f)

@@ -40,8 +40,6 @@ class othello:
         self.checkAndFlip(1, -1, x, y, val)
         self.checkAndFlip(-1, 1, x, y, val)
 
-
-        
         if(self.verbose):
             self.printBoard()
         

@@ -26,11 +26,11 @@ def loadModel(index):
 #    json_file.close()
 #    loaded_model = model_from_json(loaded_model_json)
     try:
-        model = load_model("CNN"+str(index)+".h5")
-        print("Loaded model from disk")
+        model = load_model("CNN_"+str(index-1)+".h5")
+        print("Previous model loaded from disk.")
     except Exception as e:
         model = baseline_model()
-        print(e, "\nNo model found. Creating new CNN")
+        print(e, "\nNo model found. Creating new CNN.")
     return model
 
 def saveModel(model, index):
@@ -44,11 +44,13 @@ def saveModel(model, index):
 
 # retrain model
 def retrainModel(model, simData):
+    print("\nTraining Model")
     seed = 1
     numpy.random.seed(seed)
     numpy.random.shuffle(simData)
-    
     count = 0
+    
+    # load data
     X_train = []
     y_train = []
     X_test = []
@@ -58,18 +60,24 @@ def retrainModel(model, simData):
         if(count<len(simData)*0.8):
             X_train.append(trial[0])
             y_train.append([(trial[1][0]>trial[1][1])*1,(trial[1][0]<trial[1][1])*1])
+            for i in range(3):
+                X_train.append(numpy.rot90(numpy.asarray(X_train[-1])))
+                y_train.append([(trial[1][0]>trial[1][1])*1,(trial[1][0]<trial[1][1])*1])
         else:
             X_test.append(trial[0])
             y_test.append([(trial[1][0]>trial[1][1])*1,(trial[1][0]<trial[1][1])*1])
+            for i in range(3):
+                X_test.append(numpy.rot90(numpy.asarray(X_test[-1])))
+                y_test.append([(trial[1][0]>trial[1][1])*1,(trial[1][0]<trial[1][1])*1])
         count+=1
-    
-    # load data
-    
+
+    #cast data to numpy
     X_train = numpy.asarray(X_train)
     y_train = numpy.asarray(y_train)
     X_test = numpy.asarray(X_test)
     y_test = numpy.asarray(y_test)
     
+    #rotate to quadruple data
     
     # flatten 8*8 board to a 64 vector for board
     num_DOF = X_train.shape[1] * X_train.shape[2]
@@ -82,13 +90,13 @@ def retrainModel(model, simData):
     
     # Fit the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=200, verbose=1)
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=200, verbose=0)
     
     # Final evaluation of the model
     scores = model.evaluate(X_test, y_test, verbose=0)
-    #print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+    print("Baseline Error: %.2f%%" % (100-scores[1]*100))
         
 def trainIter(model, simData, index):       
     retrainModel(model,simData)
-    saveModel(index)
+    saveModel(model, index)
         

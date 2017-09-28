@@ -58,11 +58,22 @@ class othello:
         else:
             return False
         
-    def getAvailableSpaces(self):
-        return np.argwhere(self.board == 0)
+    def getAvailableSpaces(self, val):
+        Y0 = self.getScore()
+        moves = [];
+        spaces = np.argwhere(self.board == 0)
+        if(len(spaces)>0):
+            for option in np.argwhere(self.board == 0):
+                tempBoard = othello(8, False)
+                tempBoard.board = self.board.copy()
+                tempBoard.turn(option[0], option[1], val)
+                Y1 = tempBoard.getScore()
+                if((Y1[0] > Y0[0]+1) or (Y1[1] > Y0[1]+1)):
+                    moves.append(option)
+        return moves
 
     def isGameDone(self):
-        return len(np.argwhere(self.board == 0))==0
+        return ((len(self.getAvailableSpaces(-1))<=0) or (len(self.getAvailableSpaces(-1))<=0))
     
     def getScore(self):
         return [len(np.argwhere(self.board == 1)),len(np.argwhere(self.board == -1))]

@@ -13,11 +13,12 @@ from keras.layers import Dense
 
 # define baseline model
 def baseline_model(num_DOF=64):
-	# create model
-	model = Sequential()
-	model.add(Dense(num_DOF, input_dim=num_DOF, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(2, kernel_initializer='normal', activation='softmax'))
-	return model
+    model = Sequential()
+    model.add(Dense(64, input_dim=num_DOF, kernel_initializer='normal', activation='sigmoid'))
+    model.add(Dense(32, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(8, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(2, kernel_initializer='normal', activation='relu'))
+    return model
 
 def loadModel(index):
     # load json and create model
@@ -26,7 +27,7 @@ def loadModel(index):
 #    json_file.close()
 #    loaded_model = model_from_json(loaded_model_json)
     try:
-        model = load_model("CNN_"+str(index-1)+".h5")
+        model = load_model("CNN_"+str(index)+".h5")
         print("Previous model loaded from disk.")
     except Exception as e:
         model = baseline_model()
@@ -85,12 +86,12 @@ def retrainModel(model, simData):
     X_test = X_test.reshape(X_test.shape[0], num_DOF).astype('float32')
     
     # normalize inputs from 0-255 to 0-1
-    X_train = (X_train + 1.0) / 2.0
-    X_test = (X_test + 1.0) / 2.0
+    X_train = (X_train)
+    X_test = (X_test)
     
     # Fit the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=200, verbose=0)
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=500, batch_size=200, verbose=0)
     
     # Final evaluation of the model
     scores = model.evaluate(X_test, y_test, verbose=0)

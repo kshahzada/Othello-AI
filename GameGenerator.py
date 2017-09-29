@@ -25,8 +25,8 @@ def runIter(gameNumber, model, learning_rate = 0.05):
             move = modelMove(model, game, val)
             if(len(move)>0):
                 game.turn(move[0], move[1], val)  
-            #else:
-                #print("No moves available for player ",(val+1)/2.0)
+           # else:
+               # print("No moves available for player ",(val+1)/2.0)
             
             #cycle active player
             val*=-1
@@ -56,7 +56,7 @@ def evaluate(model, gameNumber):
         
         while not game.isGameDone():            
             # Model move for player 1
-            move = modelMove(model, game, 1)
+            move = modelMove(model, game, 1, 0)
             if(len(move)>0):
                 game.turn(move[0], move[1], 1)  
             #else:
@@ -104,23 +104,28 @@ def evaluate(model, gameNumber):
 
     print("Overall Win %: ", "{0:.2f}".format(winCount/gameNumber*100))
 
-def modelMove(model, game, val, learning_rate = 0.05):
+def modelMove(model, game, val, learning_rate = 0.1):
     move = []
     maxMovePred = 0
     moves = game.getAvailableSpaces(val)
-    # Find next best move
-    for option in moves:
-        tempBoard = O(8, False)
-        tempBoard.board = game.board.copy()
-        tempBoard.turn(option[0], option[1], val)
-        X = numpy.asarray((tempBoard.board+1)/2.0).reshape(1,64)
-        Y = (model.predict(X))[0][int((val+1)/2)]
-        if(maxMovePred < Y):
-            move = option
-            maxMovePred = Y
     # pick move
     if((len(moves)>0) and (random.random() < learning_rate)):
         move = random.choice(moves)
+    else:
+        # Find next best move
+        for option in moves:
+            tempBoard = O(8, False)
+            tempBoard.board = game.board.copy()
+            tempBoard.turn(option[0], option[1], val)
+            X = numpy.asarray(tempBoard.board).reshape(1,64)
+            if(val == 1):
+                Y = (model.predict(X))[0][0]
+            else:
+                Y = (model.predict(X))[0][1]
+            if(maxMovePred < Y):
+                move = option
+                maxMovePred = Y
+    #print(val, move)
     return move
     
 def randMove(game, val):
@@ -156,9 +161,9 @@ def trainer(startNum = 1, endNum = 20):
     print("------Trainer Started--------")
     for index in range(startNum, endNum):
         print("\n\n-------- Training Round:", str(index), "---------")
-        model = CNN_Trainer.loadModel(index)
-        simData = runIter(1000, model)
+        model = CNN_Trainer.loadModel(index-1)
+        simData = runIter(100, model)
         saveSim(index, simData)
         CNN_Trainer.trainIter(model, simData, index)
-        evaluate(model, 25)
+        evaluate(model, 10)
         del model, simData

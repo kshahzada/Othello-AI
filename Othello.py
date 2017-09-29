@@ -73,7 +73,7 @@ class othello:
         return moves
 
     def isGameDone(self):
-        return ((len(self.getAvailableSpaces(-1))<=0) or (len(self.getAvailableSpaces(-1))<=0))
+        return ((len(self.getAvailableSpaces(1))<=0) or (len(self.getAvailableSpaces(-1))<=0))
     
     def getScore(self):
         return [len(np.argwhere(self.board == 1)),len(np.argwhere(self.board == -1))]

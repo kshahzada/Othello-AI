@@ -20,16 +20,25 @@ def runIter(gameNumber, model, learning_rate = 0.05):
         snapshots = []
         
         while not game.isGameDone():     
-            snapshots.append(game.board)
-            # Model move for player 1
-            move = modelMove(model, game, val)
+            if(val==1):
+                # Model move for player 1
+                move = modelMove(model, game, val, learning_rate)
+            else:
+                move = modelMove(model, game, val, learning_rate)
+
+                #move = randMove(game, val)
+                
             if(len(move)>0):
-                game.turn(move[0], move[1], val)  
-           # else:
-               # print("No moves available for player ",(val+1)/2.0)
-            
-            #cycle active player
+                game.turn(move[0], move[1], val)      
             val*=-1
+            snapshots.append(game.board)
+            #else:
+               #print("No moves available for player ",(val))
+            #print(move, val)
+           # print("-------------")
+            #print(game.board)
+            #print(val)
+            #cycle active player
             
         for snapshot in snapshots:
             sim.append([snapshot, game.getScore()])
@@ -56,7 +65,7 @@ def evaluate(model, gameNumber):
         
         while not game.isGameDone():            
             # Model move for player 1
-            move = modelMove(model, game, 1, 0)
+            move = modelMove(model, game, 1)
             if(len(move)>0):
                 game.turn(move[0], move[1], 1)  
             #else:
@@ -105,21 +114,25 @@ def evaluate(model, gameNumber):
     print("Overall Win %: ", "{0:.2f}".format(winCount/gameNumber*100))
 
 def modelMove(model, game, val, learning_rate = 0.1):
-    move = []
     maxMovePred = 0
     moves = game.getAvailableSpaces(val)
     # pick move
-    if((len(moves)>0) and (random.random() < learning_rate)):
+    if(len(moves)==0):
+        move = []
+    elif((len(moves)>0) and (random.random() < learning_rate)):
         move = random.choice(moves)
     else:
         # Find next best move
-        for option in moves:
+        move = moves[0]
+        for option in moves[1:]:
+            #print(option)
             tempBoard = O(8, False)
             tempBoard.board = game.board.copy()
             tempBoard.turn(option[0], option[1], val)
             X = numpy.asarray(tempBoard.board).reshape(1,64)
             if(val == 1):
                 Y = (model.predict(X))[0][0]
+                #print(Y)
             else:
                 Y = (model.predict(X))[0][1]
             if(maxMovePred < Y):
@@ -157,13 +170,13 @@ def loadSim(index):
         sim = pickle.load(f)
     return sim
 
-def trainer(startNum = 1, endNum = 20):
+def trainer(startNum = 1, endNum = 40):
     print("------Trainer Started--------")
     for index in range(startNum, endNum):
         print("\n\n-------- Training Round:", str(index), "---------")
         model = CNN_Trainer.loadModel(index-1)
-        simData = runIter(100, model)
+        simData = runIter(500, model)
         saveSim(index, simData)
         CNN_Trainer.trainIter(model, simData, index)
-        evaluate(model, 10)
+        evaluate(model, 25)
         del model, simData

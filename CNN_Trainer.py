@@ -9,6 +9,8 @@ import numpy
 from keras.models import load_model
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.callbacks import EarlyStopping
+
 
 
 # define baseline model
@@ -17,7 +19,7 @@ def baseline_model(num_DOF=64):
     model.add(Dense(64, input_dim=num_DOF, kernel_initializer='normal', activation='sigmoid'))
     model.add(Dense(32, kernel_initializer='normal', activation='relu'))
     model.add(Dense(8, kernel_initializer='normal', activation='relu'))
-    model.add(Dense(2, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(2, kernel_initializer='normal', activation='softmax'))
     return model
 
 def loadModel(index):
@@ -90,8 +92,10 @@ def retrainModel(model, simData):
     X_test = (X_test)
     
     # Fit the model
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=500, batch_size=200, verbose=0)
+    model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+    earlystop = EarlyStopping(monitor='val_acc', min_delta=0.0001, patience=5, \
+                          verbose=1, mode='auto')
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=500, batch_size=200, verbose=2, callbacks = [earlystop])
     
     # Final evaluation of the model
     scores = model.evaluate(X_test, y_test, verbose=0)

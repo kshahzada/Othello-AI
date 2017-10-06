@@ -8,7 +8,7 @@ import numpy as np
 np.set_printoptions(precision=0, threshold = float('Inf'))
 
 class othello:
-    def __init__(self, size, verbose=True):
+    def __init__(self, size=8, verbose=True):
         self.size = size
         self.verbose = verbose
         if(self.verbose):
@@ -87,5 +87,6 @@ class othello:
                 outString += " " '{0:g}'.format(self.board[j][i])+" "
             outString += "\n"
         print(outString)
+        print("\nScore: ", self.getScore())
 
                 

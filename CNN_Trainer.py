@@ -18,6 +18,10 @@ def baseline_model(num_DOF=64):
     model = Sequential()
     model.add(Dense(64, input_dim=num_DOF, kernel_initializer='normal', activation='sigmoid'))
     model.add(Dense(32, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(32, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(32, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(32, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(32, kernel_initializer='normal', activation='relu'))
     model.add(Dense(8, kernel_initializer='normal', activation='relu'))
     model.add(Dense(2, kernel_initializer='normal', activation='softmax'))
     return model
@@ -33,7 +37,8 @@ def loadModel(index):
         print("Previous model loaded from disk.")
     except Exception as e:
         model = baseline_model()
-        print(e, "\nNo model found. Creating new CNN.")
+        #print(e)
+        print("Creating new CNN.")
     return model
 
 def saveModel(model, index):
